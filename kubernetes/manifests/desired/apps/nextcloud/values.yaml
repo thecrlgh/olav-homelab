@@ -1,0 +1,71 @@
+nextcloud:
+  host: nextcloud.homelab.olav.ninja
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-admin-user
+    usernameKey: username
+    passwordKey: password
+  configs:
+    # add k8s pod namespace to trusted proxies, set phone region and maintenance window start time to 1am
+    mycustom.config.php: |
+      <?php
+      $CONFIG = array(
+        'trusted_proxies' => array('10.0.0.0/8'),
+        'default_phone_region' => 'NO',
+        'maintenance_window_start' => 1,
+        );
+  phpConfigs:
+    uploadLimit.ini: |
+      upload_max_filesize = 1G
+      post_max_size = 1G
+      max_input_time = 5400
+      max_execution_time = 5400
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: mysql
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-database-auth
+    usernameKey: mariadb-username
+    passwordKey: mariadb-password
+    hostKey: mariadb-hostname
+    databaseKey: mariadb-database
+
+mariadb:
+  enabled: true
+  auth:
+    database: nextcloud
+    username: nextcloud
+    existingSecret: nextcloud-database-auth
+  architecture: standalone
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: nextcloud-mariadb
+    podAffinityPreset: soft # prefer running on the same node as the main pod
+
+persistence:
+  enabled: true
+  existingClaim: nextcloud-data
+
+cronjob:
+  enabled: true
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    hajimari.io/enable: 'true'
+    hajimari.io/icon: https://nextcloud.com/wp-content/uploads/2022/08/nextcloud-logo-icon.svg
+  tls:
+    - secretName: nextcloud-tls-certificate
+      hosts:
+        - nextcloud.homelab.olav.ninja
+
+phpClientHttpsFix:
+  enabled: true
+  protocol: https

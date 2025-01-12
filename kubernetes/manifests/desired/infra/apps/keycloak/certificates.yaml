@@ -1,0 +1,51 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: self-signed-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: keycloak-jwt-signing-certificate
+spec:
+  secretName: keycloak-jwt-signing-certificate
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+  subject:
+    organizations:
+      - homelab
+  commonName: homelab
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: self-signed-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: realm.keycloak.crossplane.io/v1alpha1
+kind: KeystoreRsa
+metadata:
+  name: jwt-signing-certificate
+spec:
+  forProvider:
+    active: true
+    algorithm: RS256
+    certificateSecretRef:
+      key: tls.crt
+      name: keycloak-jwt-signing-certificate
+      namespace: keycloak
+    enabled: true
+    name: jwt-signing-certificate
+    priority: 110
+    privateKeySecretRef:
+      key: tls.key
+      name: keycloak-jwt-signing-certificate
+      namespace: keycloak
+    providerId: rsa
+    realmIdRef:
+      name: homelab

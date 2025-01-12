@@ -1,0 +1,45 @@
+name: OpenTofu
+
+on:
+  push:
+    branches: 
+      - '**'
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '**.tftpl'
+
+permissions:
+  packages: write
+
+jobs:
+  validate-tofu:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tofu Init
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/olav-st/homelab-devcontainer
+          cacheFrom: ghcr.io/olav-st/homelab-devcontainer
+          runCmd: tofu init
+
+      - name: Tofu Validate
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/olav-st/homelab-devcontainer
+          cacheFrom: ghcr.io/olav-st/homelab-devcontainer
+          runCmd: tofu validate

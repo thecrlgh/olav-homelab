@@ -1,0 +1,34 @@
+---
+apiVersion: user.keycloak.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: olav
+spec:
+  forProvider:
+    enabled: true
+    username: olav
+    initialPassword:
+      - temporary: true
+        valueSecretRef:
+          key: password
+          name: keycloak-initial-password
+          namespace: keycloak
+    realmIdRef:
+      name: homelab
+---
+apiVersion: user.keycloak.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: jiyoung
+spec:
+  forProvider:
+    enabled: true
+    username: jiyoung
+    initialPassword:
+      - temporary: true
+        valueSecretRef:
+          key: password
+          name: keycloak-initial-password
+          namespace: keycloak
+    realmIdRef:
+      name: homelab

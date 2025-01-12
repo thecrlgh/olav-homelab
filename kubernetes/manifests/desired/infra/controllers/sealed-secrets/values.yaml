@@ -1,0 +1,2 @@
+namespace: sealed-secrets
+keyRenewPeriod: "0"

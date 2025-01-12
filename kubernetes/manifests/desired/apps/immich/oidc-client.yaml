@@ -1,0 +1,22 @@
+---
+apiVersion: oidc.homelab.olav.ninja/v1alpha1
+kind: XOidcClient
+metadata:
+  name: immich
+spec:
+  displayName: Immich
+  type: CONFIDENTIAL
+  clientId: immich
+  clientSecretSecretRef:
+    namespace: immich
+    name: immich-oidc-credentials
+    key: clientSecret
+  description: Immich Client
+  grantTypes:
+    - code
+  baseUrl: "https://immich.homelab.olav.ninja"
+  redirectUris:
+    - "app.immich:/"
+    - "https://immich.homelab.olav.ninja/auth/login"
+    - "https://immich.homelab.olav.ninja/user-settings"
+  realm: homelab

@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: netbird-backend-management
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: netbird-backend-signal
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c

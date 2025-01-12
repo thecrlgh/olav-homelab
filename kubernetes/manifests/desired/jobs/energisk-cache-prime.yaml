@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: energisk-cache-prime
+  namespace: default
+spec:
+  schedule: "0 13 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: curl-container
+            image: rockylinux:9-minimal
+            command: ["/bin/sh", "-c"]
+            args:
+            - >
+              URLS="
+              https://api.energisk.app/price?area=BE&currency=EUR
+              https://api.energisk.app/price?area=BG&currency=BGN
+              https://api.energisk.app/price?area=CH&currency=CHF
+              https://api.energisk.app/price?area=CZ&currency=CZK
+              https://api.energisk.app/price?area=DE&currency=EUR
+              https://api.energisk.app/price?area=DK1&currency=DKK
+              https://api.energisk.app/price?area=DK2&currency=DKK
+              https://api.energisk.app/price?area=EE&currency=EUR
+              https://api.energisk.app/price?area=ES&currency=EUR
+              https://api.energisk.app/price?area=FI&currency=EUR
+              https://api.energisk.app/price?area=FR&currency=EUR
+              https://api.energisk.app/price?area=GR&currency=EUR
+              https://api.energisk.app/price?area=HR&currency=EUR
+              https://api.energisk.app/price?area=HU&currency=HUF
+              https://api.energisk.app/price?area=IE&currency=EUR
+              https://api.energisk.app/price?area=LT&currency=EUR
+              https://api.energisk.app/price?area=LU&currency=EUR
+              https://api.energisk.app/price?area=LV&currency=EUR
+              https://api.energisk.app/price?area=NL&currency=EUR
+              https://api.energisk.app/price?area=NO1&currency=NOK
+              https://api.energisk.app/price?area=NO2&currency=NOK
+              https://api.energisk.app/price?area=NO3&currency=NOK
+              https://api.energisk.app/price?area=NO4&currency=NOK
+              https://api.energisk.app/price?area=NO5&currency=NOK
+              https://api.energisk.app/price?area=NORD&currency=EUR
+              https://api.energisk.app/price?area=PL&currency=PLN
+              https://api.energisk.app/price?area=PT&currency=EUR
+              https://api.energisk.app/price?area=RO&currency=RON
+              https://api.energisk.app/price?area=RS&currency=RSD
+              https://api.energisk.app/price?area=SARD&currency=EUR
+              https://api.energisk.app/price?area=SE1&currency=SEK
+              https://api.energisk.app/price?area=SE2&currency=SEK
+              https://api.energisk.app/price?area=SE3&currency=SEK
+              https://api.energisk.app/price?area=SE4&currency=SEK
+              https://api.energisk.app/price?area=SI&currency=EUR
+              https://api.energisk.app/price?area=SK&currency=EUR
+              https://api.energisk.app/price?area=SICI&currency=EUR
+              https://api.energisk.app/price?area=SUD&currency=EUR
+              "
+
+              for URL in $URLS;
+              do
+                curl -s -o /dev/null -w '%{url_effective}\t%{http_code}\t%{time_total}s\n' $URL\&date=$(date -d tomorrow +'%Y-%m-%d');
+              done
+          restartPolicy: Never

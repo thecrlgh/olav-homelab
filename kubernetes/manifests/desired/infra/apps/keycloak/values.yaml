@@ -1,0 +1,26 @@
+auth:
+  adminUser: admin
+  existingSecret: keycloak-admin-password
+  passwordSecretKey: password
+
+production: true
+
+proxy: edge
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, webpublic
+  hostname: keycloak.homelab.olav.ninja
+  path: /
+  tls: true
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: keycloak-db-credentials
+  primary:
+    persistence:
+      enabled: false
+    podAffinityPreset: soft # prefer running on the same node as the main pod

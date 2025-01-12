@@ -1,0 +1,20 @@
+---
+apiVersion: oidc.homelab.olav.ninja/v1alpha1
+kind: XOidcClient
+metadata:
+  name: gitea
+spec:
+  displayName: Gitea
+  type: CONFIDENTIAL
+  clientId: gitea
+  clientSecretSecretRef:
+    key: secret
+    name: gitea-oidc-credentials
+    namespace: gitea
+  description: Gitea Client
+  grantTypes:
+    - code
+  baseUrl: "https://gitea.homelab.olav.ninja"
+  redirectUris:
+    - "https://gitea.homelab.olav.ninja/user/oauth2/keycloak/callback"
+  realm: homelab

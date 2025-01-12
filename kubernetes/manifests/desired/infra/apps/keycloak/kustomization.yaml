@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: keycloak
+
+resources:
+  - certificates.yaml
+  - namespace.yaml
+  - secrets.yaml
+  - ingress-admin.yaml
+  - middleware.yaml
+  - realms.yaml
+  - users.yaml
+  - builtin-objects.yaml
+
+helmCharts:
+- name: keycloak
+  releaseName: keycloak
+  namespace: keycloak
+  repo: oci://registry-1.docker.io/bitnamicharts
+  version: 24.3.2
+  valuesFile: values.yaml

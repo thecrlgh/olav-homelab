@@ -1,0 +1,77 @@
+image:
+  tag:  v1.123.0 # renovate: github-releases=immich-app/immich
+
+immich:
+  configuration:
+    placeholder: foo # will be replaced by kustomize patch
+  persistence:
+    library:
+      existingClaim: immich-library
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: immich-postgresql
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: immich-postgresql
+    podAffinityPreset: soft # prefer running on the same node as the main pod
+    resourcesPreset: medium
+    initdb:
+      scripts:
+        immich-superuser.sql: | # The db user is a superuser in the default docker-compose setup
+          ALTER USER immich WITH SUPERUSER; 
+    podSecurityContext:
+      fsGroup: 999
+    containerSecurityContext:
+      runAsUser: 999
+  volumePermissions:
+    enabled: true
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      enabled: false
+    podAffinityPreset: soft # prefer running on the same node as the main pod
+
+typesense:
+  enabled: true
+  persistence:
+    tsdata:
+      enabled: true
+      type: emptyDir
+
+machine-learning:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 2Gi
+    limits:
+      cpu: 3
+      ephemeral-storage: 10Gi
+  probes:
+    liveness:
+      spec:
+        initialDelaySeconds: 120
+
+server:
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        hajimari.io/enable: 'true'
+        hajimari.io/icon: https://user-images.githubusercontent.com/27055614/182044984-2ee6d1ed-c4a7-4331-8a4b-64fcde77fe1f.png
+        hajimari.io/appName: Immich
+      hosts:
+        - host: immich.homelab.olav.ninja
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: immich-tls-certificate
+          hosts:
+            - immich.homelab.olav.ninja

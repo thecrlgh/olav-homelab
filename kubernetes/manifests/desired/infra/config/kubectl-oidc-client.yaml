@@ -1,0 +1,16 @@
+---
+apiVersion: oidc.homelab.olav.ninja/v1alpha1
+kind: XOidcClient
+metadata:
+  name: kubectl
+spec:
+  displayName: Kubectl
+  type: PUBLIC
+  clientId: kubectl
+  description: Kubectl Client
+  grantTypes:
+    - code
+  redirectUris:
+    - http://localhost:8000
+    - http://localhost:18000
+  realm: homelab

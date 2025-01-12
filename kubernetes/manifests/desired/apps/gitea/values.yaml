@@ -1,0 +1,78 @@
+gitea:
+  admin:
+    existingSecret: gitea-admin-user
+  config:
+    service:
+      DISABLE_REGISTRATION: true
+    server:
+      OFFLINE_MODE: false
+      LFS_START_SERVER: true
+    session:
+      PROVIDER: memory
+    cache:
+      ADAPTER: memory
+    queue:
+      TYPE: level
+  oauth:
+    - name: keycloak
+      provider: openidConnect
+      existingSecret: gitea-oidc-credentials
+      autoDiscoverUrl: https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration
+
+service:
+  http:
+    type: ClusterIP
+    port: 3000
+    clusterIP: None
+  ssh:
+    type: ClusterIP
+    port: 22
+    clusterIP: None
+
+ingress:
+  enabled: true
+  apiVersion: networking.k8s.io/v1
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    ingress.kubernetes.io/proxy-body-size: 10000m
+    traefik.ingress.kubernetes.io/router.middlewares: gitea-login-redirect-keycloak@kubernetescrd
+    hajimari.io/enable: 'true'
+    hajimari.io/icon: https://upload.wikimedia.org/wikipedia/commons/b/bb/Gitea_Logo.svg
+  hosts:
+    - host: gitea.homelab.olav.ninja
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: gitea-tls-certificate
+      hosts:
+        - gitea.homelab.olav.ninja
+
+persistence:
+  enabled: true
+  mount: true
+  create: false
+  claimName: gitea
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: gitea-postgresql
+  image:
+    tag: 15-debian-11
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: gitea-postgresql
+    podAffinityPreset: soft # prefer running on the same node as the main pod
+
+# Disable HA components
+postgresql-ha:
+  enabled: false
+redis-cluster:
+  enabled: false
+
+# Use "Recreate" strategy for the deployment
+# to make sure that volumes are available when new pod starts
+strategy:
+  type: Recreate

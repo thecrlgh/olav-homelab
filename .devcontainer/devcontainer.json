@@ -1,0 +1,12 @@
+{
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"mounts": [
+		"target=/tmp,type=tmpfs"
+	],
+	"overrideCommand": false,
+	"postStartCommand": "while ! docker info >/dev/null 2>&1; do sleep 1; done",
+	"remoteUser": "vscode",
+	"runArgs": ["--privileged"]
+}
