@@ -19,4 +19,5 @@ patches:
   - path: patches/annotate-services.yaml
   - path: patches/fix-pvc-backend-management.yaml
   - path: patches/fix-pvc-backend-signal.yaml
+  - path: patches/patch-management-config.yaml
   - path: patches/set-deployment-strategy.yaml
