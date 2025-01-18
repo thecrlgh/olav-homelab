@@ -7294,6 +7294,7 @@ metadata:
   name: netbird-relay
   namespace: netbird
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: netbird-relay
@@ -7323,7 +7324,6 @@ spec:
             - containerPort: 80
               name: relay
               protocol: TCP
-      replicas: 1
 ---
 apiVersion: apps/v1
 kind: Deployment

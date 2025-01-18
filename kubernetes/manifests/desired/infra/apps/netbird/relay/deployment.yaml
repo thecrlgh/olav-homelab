@@ -6,6 +6,7 @@ metadata:
   name: netbird-relay
   namespace: netbird
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: netbird-relay
@@ -15,7 +16,6 @@ spec:
         app.kubernetes.io/instance: netbird-relay
         app.kubernetes.io/name: netbird-relay
     spec:
-      replicas: 1
       containers:
       - env:
         - name: NB_LOG_LEVEL
