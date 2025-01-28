@@ -7266,7 +7266,7 @@ spec:
               value: https://netbird.homelab.olav.ninja
             - name: NETBIRD_MGMT_GRPC_API_ENDPOINT
               value: https://netbird.homelab.olav.ninja
-          image: netbirdio/dashboard:v2.8.2
+          image: netbirdio/dashboard:v2.9.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
