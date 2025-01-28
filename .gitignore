@@ -1,0 +1,7 @@
+# Ignore all files and directories
+*
+
+# Allow YAML files in specific directories
+!crds/*.yaml
+!resources/*.yaml
+!composite-resources/*.yaml
