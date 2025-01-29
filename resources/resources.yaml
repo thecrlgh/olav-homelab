@@ -11328,7 +11328,7 @@ metadata:
   name: function-go-templating
   namespace: crossplane
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.9.0
+  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.9.1
 ---
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
