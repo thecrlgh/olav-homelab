@@ -40,4 +40,12 @@ resource "proxmox_virtual_environment_vm" "talos" {
   initialization {
     datastore_id = "local-zfs"
   }
+
+  dynamic "hostpci" {
+    for_each = each.value.pci_passthrough
+    content {
+      device = "hostpci${hostpci.key}"
+      id     = hostpci.value
+    }
+  }
 }

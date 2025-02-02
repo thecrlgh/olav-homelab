@@ -11,41 +11,45 @@ locals {
     {
       for i in range(var.controlplane_count) :
       "talos-cp-${substr(sha256("${i}${local.talos.current_version}"), 0, 7)}" => {
-        type      = "controlplane"
-        cpus      = 4
-        memory    = 14336
-        image     = proxmox_virtual_environment_download_file.talos_image[local.talos.current_version].id
-        bootstrap = (i == 0)
+        type             = "controlplane"
+        cpus             = 4
+        memory           = 14336
+        image            = proxmox_virtual_environment_download_file.talos_image[local.talos.current_version].id
+        bootstrap        = (i == 0)
+        pci_passthrough  = (i == 0) ? ["0000:03:00"] : []
       }
     },
     {
       for i in(local.is_upgrade ? range(var.controlplane_count) : []) :
       "talos-cp-${substr(sha256("${i}${local.talos.upgrade_version}"), 0, 7)}" => {
-        type      = "controlplane"
-        cpus      = 4
-        memory    = 14336
-        image     = proxmox_virtual_environment_download_file.talos_image[local.talos.upgrade_version].id
-        bootstrap = false
+        type            = "controlplane"
+        cpus            = 4
+        memory          = 14336
+        image           = proxmox_virtual_environment_download_file.talos_image[local.talos.upgrade_version].id
+        bootstrap       = false
+        pci_passthrough = []
       }
     },
     {
       for i in range(var.worker_count) :
       "talos-worker-${substr(sha256("${i}${local.talos.current_version}"), 0, 7)}" => {
-        type      = "worker"
-        cpus      = 4
-        memory    = 4096
-        image     = proxmox_virtual_environment_download_file.talos_image[local.talos.current_version].id
-        bootstrap = false
+        type            = "worker"
+        cpus            = 4
+        memory          = 4096
+        image           = proxmox_virtual_environment_download_file.talos_image[local.talos.current_version].id
+        bootstrap       = false
+        pci_passthrough = []
       }
     },
     {
       for i in(local.is_upgrade ? range(var.worker_count) : []) :
       "talos-worker-${substr(sha256("${i}${local.talos.upgrade_version}"), 0, 7)}" => {
-        type      = "worker"
-        cpus      = 4
-        memory    = 4096
-        image     = proxmox_virtual_environment_download_file.talos_image[local.talos.upgrade_version].id
-        bootstrap = false
+        type            = "worker"
+        cpus            = 4
+        memory          = 4096
+        image           = proxmox_virtual_environment_download_file.talos_image[local.talos.upgrade_version].id
+        bootstrap       = false
+        pci_passthrough = []
       }
     },
   )
