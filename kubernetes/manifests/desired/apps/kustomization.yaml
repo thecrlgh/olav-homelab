@@ -6,3 +6,4 @@ resources:
   - ./immich
   - ./nextcloud
   - ./ollama
+  - ./openwebui
