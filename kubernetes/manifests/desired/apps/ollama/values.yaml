@@ -6,8 +6,8 @@ ollama:
 
   models:
     pull:
-      - mistral
       - llama2
+      - deepseek-r1:8b
 
 ingress:
   enabled: true
