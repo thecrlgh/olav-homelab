@@ -11059,7 +11059,7 @@ metadata:
   namespace: openwebui
 spec:
   rules:
-    - host: https://openwebui.homelab.olav.ninja
+    - host: openwebui.homelab.olav.ninja
       http:
         paths:
           - backend:
@@ -11071,7 +11071,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - https://openwebui.homelab.olav.ninja
+        - openwebui.homelab.olav.ninja
       secretName: openwebui-tls-certificate
 ---
 apiVersion: networking.k8s.io/v1
