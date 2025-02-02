@@ -7325,7 +7325,7 @@ spec:
                 command:
                   - /bin/sh
                   - -c
-                  - "while ! /bin/ollama ps > /dev/null 2>&1; do\n  sleep 5\ndone\necho \"llama2 deepseek-r1:8b\" | xargs -n1 /bin/ollama pull \n"
+                  - "while ! /bin/ollama ps > /dev/null 2>&1; do\n  sleep 5\ndone\necho \"llama2\" | xargs -n1 /bin/ollama pull \n"
           livenessProbe:
             failureThreshold: 6
             httpGet:
