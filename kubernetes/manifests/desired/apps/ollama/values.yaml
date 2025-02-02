@@ -1,0 +1,26 @@
+ollama:
+  gpu:
+    enabled: true
+    type: 'amd'
+    number: 1
+
+  models:
+    pull:
+      - mistral
+      - llama2
+
+ingress:
+  enabled: true
+  annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      hajimari.io/enable: 'true'
+      hajimari.io/icon: https://ollama.com/public/ollama.png
+  hosts:
+    - host: ollama.homelab.olav.ninja
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ollama-tls-certificate
+      hosts:
+        - ollama.homelab.olav.ninja
