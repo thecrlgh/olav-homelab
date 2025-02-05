@@ -11270,7 +11270,7 @@ metadata:
   name: provider-keycloak
   namespace: crossplane
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-keycloak:v1.10.1
+  package: xpkg.upbound.io/crossplane-contrib/provider-keycloak:v1.11.0
 ---
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
