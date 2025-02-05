@@ -394,7 +394,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
     app.kubernetes.io/version: 0.5.7
-    helm.sh/chart: ollama-1.4.0
+    helm.sh/chart: ollama-1.4.1
   name: ollama
   namespace: ollama
 ---
@@ -4921,7 +4921,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
     app.kubernetes.io/version: 0.5.7
-    helm.sh/chart: ollama-1.4.0
+    helm.sh/chart: ollama-1.4.1
   name: ollama
   namespace: ollama
 spec:
@@ -7333,7 +7333,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
     app.kubernetes.io/version: 0.5.7
-    helm.sh/chart: ollama-1.4.0
+    helm.sh/chart: ollama-1.4.1
   name: ollama
   namespace: ollama
 spec:
@@ -7351,7 +7351,7 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: ollama
         app.kubernetes.io/version: 0.5.7
-        helm.sh/chart: ollama-1.4.0
+        helm.sh/chart: ollama-1.4.1
     spec:
       containers:
         - args: null
@@ -11022,7 +11022,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
     app.kubernetes.io/version: 0.5.7
-    helm.sh/chart: ollama-1.4.0
+    helm.sh/chart: ollama-1.4.1
   name: ollama
   namespace: ollama
 spec:
@@ -11486,7 +11486,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
     app.kubernetes.io/version: 0.5.7
-    helm.sh/chart: ollama-1.4.0
+    helm.sh/chart: ollama-1.4.1
   name: ollama-test-connection
   namespace: ollama
 spec:
