@@ -18,4 +18,5 @@ pipelines:
   enabled: false
 
 persistence:
-  enabled: false
+  enabled: true
+  existingClaim: open-webui
