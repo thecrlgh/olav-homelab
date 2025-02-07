@@ -11,6 +11,15 @@ module "playbook-hdd-spindown" {
   playbook_file = "${local.module_path}/playbooks/hdd-spindown.yaml"
 }
 
+module "playbook-pci-passthrough" {
+  source = "./ansible"
+
+  host = var.proxmox_ip
+  user = "root"
+
+  playbook_file = "${local.module_path}/playbooks/pci-passthrough.yaml"
+}
+
 module "playbook-repositories" {
   source = "./ansible"
 
@@ -18,6 +27,15 @@ module "playbook-repositories" {
   user = "root"
 
   playbook_file = "${local.module_path}/playbooks/repositories.yaml"
+}
+
+module "playbook-vendor-reset" {
+  source = "./ansible"
+
+  host = var.proxmox_ip
+  user = "root"
+
+  playbook_file = "${local.module_path}/playbooks/vendor-reset.yaml"
 }
 
 module "playbook-zfs-backup" {

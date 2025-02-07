@@ -5,12 +5,13 @@ resource "proxmox_virtual_environment_vm" "talos" {
   description = "Managed by OpenTofu"
   tags        = ["tofu"]
   on_boot     = true
+  machine     = "q35"
 
   node_name   = var.proxmox_node
 
   cpu {
     cores        = each.value.cpus
-    type         = "x86-64-v2-AES"
+    type         = "x86-64-v3"
   }
 
   memory {
@@ -46,6 +47,8 @@ resource "proxmox_virtual_environment_vm" "talos" {
     content {
       device = "hostpci${hostpci.key}"
       id     = hostpci.value
+      pcie   = true
+      rombar = true
     }
   }
 }
