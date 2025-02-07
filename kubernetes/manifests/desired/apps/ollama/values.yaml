@@ -1,3 +1,6 @@
+image:
+  tag: 0.5.8-rc10-rocm # renovate: docker=ollama/ollama
+
 ollama:
   gpu:
     enabled: true
