@@ -11031,8 +11031,6 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    hajimari.io/enable: "true"
-    hajimari.io/icon: https://ollama.com/public/ollama.png
   labels:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
