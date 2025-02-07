@@ -7357,7 +7357,7 @@ spec:
         - args: null
           env: null
           envFrom: null
-          image: ollama/ollama:0.5.7-rocm
+          image: ollama/ollama:0.5.8-rc10-rocm
           imagePullPolicy: IfNotPresent
           lifecycle:
             postStart:
@@ -7365,7 +7365,7 @@ spec:
                 command:
                   - /bin/sh
                   - -c
-                  - "while ! /bin/ollama ps > /dev/null 2>&1; do\n  sleep 5\ndone\necho \"llama2 tinyllama\" | xargs -n1 /bin/ollama pull \n"
+                  - "while ! /bin/ollama ps > /dev/null 2>&1; do\n  sleep 5\ndone\necho \"llama2 tinyllama deepseek-r1:8b\" | xargs -n1 /bin/ollama pull \n"
           livenessProbe:
             failureThreshold: 6
             httpGet:
