@@ -7434,7 +7434,7 @@ spec:
       containers:
         - env:
             - name: OLLAMA_BASE_URLS
-              value: https://ollama.homelab.olav.ninja
+              value: http://ollama.ollama.svc.cluster.local:11434
             - name: OPENAI_API_BASE_URL
             - name: OPENAI_API_KEY
               value: 0p3n-w3bu!
