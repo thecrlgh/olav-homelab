@@ -11,6 +11,7 @@ ollama:
     pull:
       - llama2
       - tinyllama
+      - deepseek-r1:8b
 
 ingress:
   enabled: true
