@@ -2,7 +2,7 @@ ollama:
   enabled: false # Deployed separately
 
 ollamaUrls:
-  - https://ollama.homelab.olav.ninja
+  - http://ollama.ollama.svc.cluster.local:11434
 
 ingress:
   enabled: true
