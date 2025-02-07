@@ -23,9 +23,9 @@ persistence:
 
 extraEnvVars:
   - name: ENABLE_OAUTH_SIGNUP
-    value: True
+    value: "True"
   - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
-    value: True
+    value: "True"
   - name: OAUTH_CLIENT_ID
     valueFrom:
       secretKeyRef:
