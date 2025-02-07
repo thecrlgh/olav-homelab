@@ -4,7 +4,9 @@ namespace: openwebui
 
 resources:
   - namespace.yaml
+  - oidc-client.yaml
   - pvcs.yaml
+  - secrets.yaml
 
 helmCharts:
   - name: open-webui

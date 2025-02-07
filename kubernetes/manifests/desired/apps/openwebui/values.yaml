@@ -20,3 +20,25 @@ pipelines:
 persistence:
   enabled: true
   existingClaim: open-webui
+
+extraEnvVars:
+  - name: ENABLE_OAUTH_SIGNUP
+    value: True
+  - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
+    value: True
+  - name: OAUTH_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: openwebui-oidc-credentials
+        key: clientId
+  - name: OAUTH_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: openwebui-oidc-credentials
+        key: clientSecret
+  - name: OPENID_PROVIDER_URL
+    value: https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration
+  - name: OAUTH_PROVIDER_NAME
+    value: Keycloak
+  - name: OAUTH_SCOPES
+    value: openid email profile
