@@ -8861,9 +8861,9 @@ spec:
               value: http://ollama.ollama.svc.cluster.local:11434
             - name: OPENAI_API_BASE_URL
             - name: ENABLE_OAUTH_SIGNUP
-              value: true
+              value: "True"
             - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
-              value: true
+              value: "True"
             - name: OAUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
