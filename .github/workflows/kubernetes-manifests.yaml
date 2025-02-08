@@ -51,7 +51,7 @@ jobs:
             make start-dev-cluster
             make test
 
-      - name: Generate diff for PR
+      - name: Generate diff comment for PR
         if: github.event_name == 'pull_request'
         run: |
           # Fetch and checkout rendered_manifests branch
@@ -61,34 +61,28 @@ jobs:
           # Copy rendered manifests
           cp -r kubernetes/manifests/rendered/* .
           
-          # Compare rendered manifests with current files in the rendered_manifests branch
-          diff_output=$(git diff)
-          
-          # Save diff to file
-          echo "$diff_output" > manifest_diff.txt
-          
-          # Create comment with diff
-          if [ -s manifest_diff.txt ]; then
-            echo "DIFF_EXISTS=true" >> $GITHUB_ENV
-            echo 'DIFF_CONTENT<<EOF' >> $GITHUB_ENV
-            echo '```diff' >> $GITHUB_ENV
-            cat manifest_diff.txt >> $GITHUB_ENV
-            echo '```' >> $GITHUB_ENV
-            echo 'EOF' >> $GITHUB_ENV
-          else
-            echo "DIFF_EXISTS=false" >> $GITHUB_ENV
-          fi
+          # Generate diff with markdown formatting
+          echo "### Rendered Manifest Changes" > manifests_diff.md
+          echo "" >> manifests_diff.md
+          echo "This PR will make the following changes to the rendered manifests:" >> manifests_diff.md
+          echo "" >> manifests_diff.md
+          echo '```diff' >> manifests_diff.md
+          # Truncate the diff to ~60KB to ensure we stay under GitHub's limit including the markdown
+          git diff | head -c 61440 >> manifests_diff.md
+          echo -e "\n... (diff truncated due to size)" >> manifests_diff.md
+          echo '```' >> manifests_diff.md
 
       - name: Comment on PR
-        if: github.event_name == 'pull_request' && env.DIFF_EXISTS == 'true'
+        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "### Rendered Manifest Changes
-
-          This PR will make the following changes to the rendered manifests:
-
-          ${DIFF_CONTENT}" | gh pr comment ${{ github.event.pull_request.number }} -F -
+          # Check if there's already a comment from the bot
+          if gh pr view ${{ github.event.pull_request.number }} --json comments --jq '.comments[].author.login' | grep -q "github-actions"; then
+            gh pr comment ${{ github.event.pull_request.number }} -F manifests_diff.md --edit-last
+          else
+            gh pr comment ${{ github.event.pull_request.number }} -F manifests_diff.md
+          fi
 
       - name: Update rendered manifests branch
         if: github.ref == 'refs/heads/main'
