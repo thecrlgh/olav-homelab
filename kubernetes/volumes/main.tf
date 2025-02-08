@@ -37,7 +37,11 @@ locals {
       name = "nextcloud-mariadb"
       size = 10
     },
-        {
+    {
+      name = "ollama"
+      size = 60
+    },
+    {
       name = "open-webui"
       size = 10
     },

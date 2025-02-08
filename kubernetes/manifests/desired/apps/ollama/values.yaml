@@ -7,12 +7,6 @@ ollama:
     type: 'amd'
     number: 1
 
-  models:
-    pull:
-      - llama2
-      - tinyllama
-      - deepseek-r1:8b
-
 ingress:
   enabled: true
   annotations:
@@ -26,3 +20,11 @@ ingress:
     - secretName: ollama-tls-certificate
       hosts:
         - ollama.homelab.olav.ninja
+
+persistentVolume:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  storageClass: proxmox-csi
+  size: 60Gi
+  volumeName: ollama
