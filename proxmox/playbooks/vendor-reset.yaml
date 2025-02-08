@@ -77,4 +77,3 @@
       file:
         path: /tmp/vendor-reset
         state: absent
-
