@@ -5153,6 +5153,26 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  labels:
+    app.kubernetes.io/instance: ollama
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/version: 0.5.7
+    helm.sh/chart: ollama-1.4.1
+  name: ollama
+  namespace: ollama
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi
+  storageClassName: proxmox-csi
+  volumeName: ollama
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: open-webui
   namespace: openwebui
 spec:
@@ -7373,13 +7393,6 @@ spec:
           envFrom: null
           image: ollama/ollama:0.5.8-rc10-rocm
           imagePullPolicy: IfNotPresent
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - "while ! /bin/ollama ps > /dev/null 2>&1; do\n  sleep 5\ndone\necho \"llama2 tinyllama deepseek-r1:8b\" | xargs -n1 /bin/ollama pull \n"
           livenessProbe:
             failureThreshold: 6
             httpGet:
@@ -7415,8 +7428,9 @@ spec:
       serviceAccountName: ollama
       tolerations: null
       volumes:
-        - emptyDir: {}
-          name: ollama-data
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama
 ---
 apiVersion: apps/v1
 kind: Deployment
