@@ -22,6 +22,8 @@ persistence:
   existingClaim: open-webui
 
 extraEnvVars:
+  - name: ENABLE_OPENAI_API
+    value: "False"
   - name: ENABLE_OAUTH_SIGNUP
     value: "True"
   - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
