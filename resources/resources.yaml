@@ -205,8 +205,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-controller
   namespace: csi-proxmox
 ---
@@ -217,8 +217,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-node
   namespace: csi-proxmox
 ---
@@ -586,8 +586,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-controller
   namespace: csi-proxmox
 rules:
@@ -739,8 +739,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-controller
   namespace: csi-proxmox
 rules:
@@ -828,8 +828,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-node
   namespace: csi-proxmox
 rules:
@@ -5814,8 +5814,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-controller
   namespace: csi-proxmox
 spec:
@@ -5843,7 +5843,7 @@ spec:
             - -v=5
             - --csi-address=unix:///csi/csi.sock
             - --cloud-config=/etc/proxmox/config.yaml
-          image: ghcr.io/sergelogvinov/proxmox-csi-controller:v0.10.0
+          image: ghcr.io/sergelogvinov/proxmox-csi-controller:v0.11.0
           imagePullPolicy: IfNotPresent
           name: proxmox-csi-plugin-controller
           ports: null
@@ -9550,8 +9550,8 @@ metadata:
     app.kubernetes.io/instance: proxmox-csi-plugin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: proxmox-csi-plugin
-    app.kubernetes.io/version: v0.10.0
-    helm.sh/chart: proxmox-csi-plugin-0.3.4
+    app.kubernetes.io/version: v0.11.0
+    helm.sh/chart: proxmox-csi-plugin-0.3.5
   name: proxmox-csi-plugin-node
   namespace: csi-proxmox
 spec:
@@ -9577,7 +9577,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          image: ghcr.io/sergelogvinov/proxmox-csi-node:v0.10.0
+          image: ghcr.io/sergelogvinov/proxmox-csi-node:v0.11.0
           imagePullPolicy: IfNotPresent
           name: proxmox-csi-plugin-node
           resources: {}
