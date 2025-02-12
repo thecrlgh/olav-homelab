@@ -3359,7 +3359,7 @@ data:
     - apps:
       - icon: https://brands.home-assistant.io/homeassistant/icon.png
         name: Home Assistant
-        url: http://homeassistant.homelab.olav.ninja:8123
+        url: https://homeassistant.homelab.olav.ninja
       group: Applications
     darkTheme: tron
     defaultEnable: false
