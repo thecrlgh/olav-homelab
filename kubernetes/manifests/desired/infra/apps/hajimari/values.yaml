@@ -28,7 +28,7 @@ hajimari:
     - group: Applications
       apps:
         - name: Home Assistant
-          url: 'http://homeassistant.homelab.olav.ninja:8123'
+          url: 'https://homeassistant.homelab.olav.ninja'
           icon: 'https://brands.home-assistant.io/homeassistant/icon.png'
 
 ingress:
