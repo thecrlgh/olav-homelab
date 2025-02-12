@@ -62,3 +62,16 @@ variable "sealed_secrets_key" {
   type      = string
   sensitive = true
 }
+
+variable "letsencrypt_contact_email" {
+  type = string
+}
+
+variable "cloudflare_dns_email" {
+  type = string
+}
+
+variable "cloudflare_dns_token" {
+  type      = string
+  sensitive = true
+}

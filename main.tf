@@ -1,7 +1,10 @@
 module "proxmox" {
-  source       = "./proxmox"
-  proxmox_node = var.proxmox_node
-  proxmox_ip   = var.proxmox_ip
+  source                    = "./proxmox"
+  proxmox_node              = var.proxmox_node
+  proxmox_ip                = var.proxmox_ip
+  letsencrypt_contact_email = var.letsencrypt_contact_email
+  cloudflare_dns_email      = var.letsencrypt_contact_email
+  cloudflare_dns_token      = var.cloudflare_dns_token
 }
 
 module "home-assistant" {
