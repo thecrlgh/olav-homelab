@@ -3374,7 +3374,7 @@ data:
       - name: OpenWrt
         url: http://192.168.0.1
       - name: Proxmox
-        url: https://192.168.0.190:8006
+        url: https://proxmox.homelab.olav.ninja:8006
       group: Infrastructure
     - bookmarks:
       - name: Cloudflare Dashboard
