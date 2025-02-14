@@ -39,6 +39,10 @@
       "automerge": false
     },
     {
+      "matchPackageNames": ["siderolabs/talos"],
+      "automerge": false
+    },
+    {
       "matchPackageNames": ["crossplane", "crossplane/crossplane"],
       "groupName": "crossplane"
     },
