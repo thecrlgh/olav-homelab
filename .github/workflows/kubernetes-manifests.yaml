@@ -68,7 +68,7 @@ jobs:
           echo "" >> manifests_diff.md
           echo '```diff' >> manifests_diff.md
           # Truncate the diff to ~60KB to ensure we stay under GitHub's limit including the markdown
-          git diff | head -c 61440 >> manifests_diff.md
+          git diff --unified=2 | head -c 61440 >> manifests_diff.md
           echo -e "\n... (diff truncated due to size)" >> manifests_diff.md
           echo '```' >> manifests_diff.md
 
