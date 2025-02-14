@@ -57,19 +57,26 @@ jobs:
           # Fetch and checkout rendered_manifests branch
           git fetch origin rendered_manifests
           git checkout rendered_manifests
-          
+
           # Copy rendered manifests
           cp -r kubernetes/manifests/rendered/* .
-          
+
           # Generate diff with markdown formatting
           echo "### Rendered Manifest Changes" > manifests_diff.md
           echo "" >> manifests_diff.md
           echo "This PR will make the following changes to the rendered manifests:" >> manifests_diff.md
           echo "" >> manifests_diff.md
           echo '```diff' >> manifests_diff.md
-          # Truncate the diff to ~60KB to ensure we stay under GitHub's limit including the markdown
-          git diff --unified=2 | head -c 61440 >> manifests_diff.md
-          echo -e "\n... (diff truncated due to size)" >> manifests_diff.md
+
+          # Check if diff is larger than ~60KB (GitHub limitation)
+          FULL_DIFF=$(git diff)
+          if [ ${#FULL_DIFF} -gt 61440 ]; then
+            echo "$FULL_DIFF" | head -c 61440 >> manifests_diff.md
+            echo -e "\n... (diff truncated due to size)" >> manifests_diff.md
+          else
+            echo "$FULL_DIFF" >> manifests_diff.md
+          fi
+          
           echo '```' >> manifests_diff.md
 
       - name: Comment on PR
