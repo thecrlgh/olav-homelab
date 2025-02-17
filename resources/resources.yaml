@@ -289,8 +289,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 ---
@@ -302,8 +302,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql
   namespace: keycloak
 ---
@@ -3627,8 +3627,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak-env-vars
   namespace: keycloak
 ---
@@ -4743,8 +4743,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 spec:
@@ -4769,8 +4769,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak-headless
   namespace: keycloak
 spec:
@@ -4795,8 +4795,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql
   namespace: keycloak
 spec:
@@ -4820,8 +4820,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql-hl
   namespace: keycloak
 spec:
@@ -8361,8 +8361,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 spec:
@@ -8378,15 +8378,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configmap-env-vars: 9ad805b2925a7ac5a0768b034e145fe7d506d0ba812bc00dfa558f9b35ebfdda
+        checksum/configmap-env-vars: 067f3b7eab583eaa6de830f660b42bdb1b31d26db6c0c9261a98298f9a942439
       labels:
-        app.kubernetes.io/app-version: 26.1.1
+        app.kubernetes.io/app-version: 26.1.2
         app.kubernetes.io/component: keycloak
         app.kubernetes.io/instance: keycloak
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: keycloak
-        app.kubernetes.io/version: 26.1.1
-        helm.sh/chart: keycloak-24.4.9
+        app.kubernetes.io/version: 26.1.2
+        helm.sh/chart: keycloak-24.4.10
     spec:
       affinity:
         nodeAffinity: null
@@ -8427,7 +8427,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: keycloak-env-vars
-          image: docker.io/bitnami/keycloak:26.1.1-debian-12-r0
+          image: docker.io/bitnami/keycloak:26.1.2-debian-12-r0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -8510,7 +8510,7 @@ spec:
               info "Copy operation completed"
           command:
             - /bin/bash
-          image: docker.io/bitnami/keycloak:26.1.1-debian-12-r0
+          image: docker.io/bitnami/keycloak:26.1.2-debian-12-r0
           imagePullPolicy: IfNotPresent
           name: prepare-write-dirs
           resources:
@@ -8559,8 +8559,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql
   namespace: keycloak
 spec:
@@ -8578,8 +8578,8 @@ spec:
         app.kubernetes.io/instance: keycloak
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 17.2.0
-        helm.sh/chart: postgresql-16.4.6
+        app.kubernetes.io/version: 17.3.0
+        helm.sh/chart: postgresql-16.4.9
       name: keycloak-postgresql
     spec:
       affinity:
@@ -8645,7 +8645,7 @@ spec:
               value: error
             - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
               value: pgaudit
-          image: docker.io/bitnami/postgresql:17.2.0-debian-12-r10
+          image: docker.io/bitnami/postgresql:17.3.0-debian-12-r1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -9183,8 +9183,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 spec:
@@ -9203,8 +9203,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql
   namespace: keycloak
 spec:
@@ -10973,8 +10973,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 spec:
@@ -11340,8 +11340,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: keycloak
-    app.kubernetes.io/version: 26.1.1
-    helm.sh/chart: keycloak-24.4.9
+    app.kubernetes.io/version: 26.1.2
+    helm.sh/chart: keycloak-24.4.10
   name: keycloak
   namespace: keycloak
 spec:
@@ -11368,8 +11368,8 @@ metadata:
     app.kubernetes.io/instance: keycloak
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 17.2.0
-    helm.sh/chart: postgresql-16.4.6
+    app.kubernetes.io/version: 17.3.0
+    helm.sh/chart: postgresql-16.4.9
   name: keycloak-postgresql
   namespace: keycloak
 spec:
