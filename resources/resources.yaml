@@ -414,7 +414,7 @@ metadata:
     app.kubernetes.io/instance: openwebui
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/version: 0.5.14
-    helm.sh/chart: open-webui-5.16.0
+    helm.sh/chart: open-webui-5.16.1
   name: open-webui
   namespace: openwebui
 ---
@@ -5045,7 +5045,7 @@ metadata:
     app.kubernetes.io/instance: openwebui
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/version: 0.5.14
-    helm.sh/chart: open-webui-5.16.0
+    helm.sh/chart: open-webui-5.16.1
   name: open-webui
   namespace: openwebui
 spec:
@@ -8951,7 +8951,7 @@ metadata:
     app.kubernetes.io/instance: openwebui
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/version: 0.5.14
-    helm.sh/chart: open-webui-5.16.0
+    helm.sh/chart: open-webui-5.16.1
   name: open-webui
   namespace: openwebui
 spec:
@@ -8968,7 +8968,7 @@ spec:
         app.kubernetes.io/instance: openwebui
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/version: 0.5.14
-        helm.sh/chart: open-webui-5.16.0
+        helm.sh/chart: open-webui-5.16.1
     spec:
       automountServiceAccountToken: false
       containers:
@@ -11219,7 +11219,7 @@ metadata:
     app.kubernetes.io/instance: openwebui
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/version: 0.5.14
-    helm.sh/chart: open-webui-5.16.0
+    helm.sh/chart: open-webui-5.16.1
   name: open-webui
   namespace: openwebui
 spec:
