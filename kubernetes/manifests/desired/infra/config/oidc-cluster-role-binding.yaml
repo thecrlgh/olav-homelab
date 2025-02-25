@@ -10,3 +10,6 @@ subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: User
     name: oidc:olav
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: oidc:jiyoung
