@@ -237,8 +237,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql
   namespace: gitea
 ---
@@ -4227,14 +4227,168 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea
   namespace: gitea
 stringData:
   assertions: ""
-  config_environment.sh: "#!/usr/bin/env bash\nset -euo pipefail\n\nfunction env2ini::log() {\n  printf \"${1}\\n\"\n}\n\nfunction env2ini::read_config_to_env() {\n  local section=\"${1}\"\n  local line=\"${2}\"\n\n  if [[ -z \"${line}\" ]]; then\n    # skip empty line\n    return\n  fi\n  \n  # 'xargs echo -n' trims all leading/trailing whitespaces and a trailing new line\n  local setting=\"$(awk -F '=' '{print $1}' <<< \"${line}\" | xargs echo -n)\"\n\n  if [[ -z \"${setting}\" ]]; then\n    env2ini::log '  ! invalid setting'\n    exit 1\n  fi\n\n  local value=''\n  local regex=\"^${setting}(\\s*)=(\\s*)(.*)\"\n  if [[ $line =~ $regex ]]; then\n    value=\"${BASH_REMATCH[3]}\"\n  else\n    env2ini::log '  ! invalid setting'\n    exit 1\n  fi\n\n  env2ini::log \"    + '${setting}'\"\n\n  if [[ -z \"${section}\" ]]; then\n    export \"GITEA____${setting^^}=${value}\"                           # '^^' makes the variable content uppercase\n    return\n  fi\n\n  local masked_section=\"${section//./_0X2E_}\"                            # '//' instructs to replace all matches\n  masked_section=\"${masked_section//-/_0X2D_}\"\n\n  export \"GITEA__${masked_section^^}__${setting^^}=${value}\"        # '^^' makes the variable content uppercase\n}\n\nfunction env2ini::reload_preset_envs() {\n  env2ini::log \"Reloading preset envs...\"\n\n  while read -r line; do\n    if [[ -z \"${line}\" ]]; then\n      # skip empty line\n      return\n    fi\n\n    # 'xargs echo -n' trims all leading/trailing whitespaces and a trailing new line\n    local setting=\"$(awk -F '=' '{print $1}' <<< \"${line}\" | xargs echo -n)\"\n\n    if [[ -z \"${setting}\" ]]; then\n      env2ini::log '  ! invalid setting'\n      exit 1\n    fi\n\n    local value=''\n    local regex=\"^${setting}(\\s*)=(\\s*)(.*)\"\n    if [[ $line =~ $regex ]]; then\n      value=\"${BASH_REMATCH[3]}\"\n    else\n      env2ini::log '  ! invalid setting'\n      exit 1\n    fi\n\n    env2ini::log \"  + '${setting}'\"\n\n    export \"${setting^^}=${value}\"                           # '^^' makes the variable content uppercase\n  done < \"/tmp/existing-envs\"\n\n  rm /tmp/existing-envs\n}\n\n\nfunction env2ini::process_config_file() {\n  local config_file=\"${1}\"\n  local section=\"$(basename \"${config_file}\")\"\n\n  if [[ $section == '_generals_' ]]; then\n    env2ini::log \"  [ini root]\"\n    section=''\n  else\n    env2ini::log \"  ${section}\"\n  fi\n\n  while read -r line; do\n    env2ini::read_config_to_env \"${section}\" \"${line}\"\n  done < <(awk 1 \"${config_file}\")                             # Helm .toYaml trims the trailing new line which breaks line processing; awk 1 ... adds it back while reading\n}\n\nfunction env2ini::load_config_sources() {\n  local path=\"${1}\"\n\n  if [[ -d \"${path}\" ]]; then\n    env2ini::log \"Processing $(basename \"${path}\")...\"\n\n    while read -d '' configFile; do\n      env2ini::process_config_file \"${configFile}\"\n    done < <(find \"${path}\" -type l -not -name '..data' -print0)\n\n    env2ini::log \"\\n\"\n  fi\n}\n\nfunction env2ini::generate_initial_secrets() {\n  # These environment variables will either be\n  #   - overwritten with user defined values,\n  #   - initially used to set up Gitea\n  # Anyway, they won't harm existing app.ini files\n\n  export GITEA__SECURITY__INTERNAL_TOKEN=$(gitea generate secret INTERNAL_TOKEN)\n  export GITEA__SECURITY__SECRET_KEY=$(gitea generate secret SECRET_KEY)\n  export GITEA__OAUTH2__JWT_SECRET=$(gitea generate secret JWT_SECRET)\n  export GITEA__SERVER__LFS_JWT_SECRET=$(gitea generate secret LFS_JWT_SECRET)\n\n  env2ini::log \"...Initial secrets generated\\n\"\n}\n\n# save existing envs prior to script execution. Necessary to keep order of preexisting and custom envs\nenv | (grep -e '^GITEA__' || [[ $? == 1 ]]) > /tmp/existing-envs\n\n# MUST BE CALLED BEFORE OTHER CONFIGURATION\nenv2ini::generate_initial_secrets\n\nenv2ini::load_config_sources '/env-to-ini-mounts/inlines/'\nenv2ini::load_config_sources '/env-to-ini-mounts/additionals/'\n\n# load existing envs to override auto generated envs\nenv2ini::reload_preset_envs\n\nenv2ini::log \"=== All configuration sources loaded ===\\n\"\n\n# safety to prevent rewrite of secret keys if an app.ini already exists\nif [ -f ${GITEA_APP_INI} ]; then\n  env2ini::log 'An app.ini file already exists. To prevent overwriting secret keys, these settings are dropped and remain unchanged:'\n  env2ini::log '  - security.INTERNAL_TOKEN'\n  env2ini::log '  - security.SECRET_KEY'\n  env2ini::log '  - oauth2.JWT_SECRET'\n  env2ini::log '  - server.LFS_JWT_SECRET'\n\n  unset GITEA__SECURITY__INTERNAL_TOKEN\n  unset GITEA__SECURITY__SECRET_KEY\n  unset GITEA__OAUTH2__JWT_SECRET\n  unset GITEA__SERVER__LFS_JWT_SECRET\nfi\n\nenvironment-to-ini -o $GITEA_APP_INI"
+  config_environment.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    function env2ini::log() {
+      printf "${1}\n"
+    }
+
+    function env2ini::read_config_to_env() {
+      local section="${1}"
+      local line="${2}"
+
+      if [[ -z "${line}" ]]; then
+        # skip empty line
+        return
+      fi
+
+      # 'xargs echo -n' trims all leading/trailing whitespaces and a trailing new line
+      local setting="$(awk -F '=' '{print $1}' <<< "${line}" | xargs echo -n)"
+
+      if [[ -z "${setting}" ]]; then
+        env2ini::log '  ! invalid setting'
+        exit 1
+      fi
+
+      local value=''
+      local regex="^${setting}(\s*)=(\s*)(.*)"
+      if [[ $line =~ $regex ]]; then
+        value="${BASH_REMATCH[3]}"
+      else
+        env2ini::log '  ! invalid setting'
+        exit 1
+      fi
+
+      env2ini::log "    + '${setting}'"
+
+      if [[ -z "${section}" ]]; then
+        export "GITEA____${setting^^}=${value}"                           # '^^' makes the variable content uppercase
+        return
+      fi
+
+      local masked_section="${section//./_0X2E_}"                            # '//' instructs to replace all matches
+      masked_section="${masked_section//-/_0X2D_}"
+
+      export "GITEA__${masked_section^^}__${setting^^}=${value}"        # '^^' makes the variable content uppercase
+    }
+
+    function env2ini::reload_preset_envs() {
+      env2ini::log "Reloading preset envs..."
+
+      while read -r line; do
+        if [[ -z "${line}" ]]; then
+          # skip empty line
+          return
+        fi
+
+        # 'xargs echo -n' trims all leading/trailing whitespaces and a trailing new line
+        local setting="$(awk -F '=' '{print $1}' <<< "${line}" | xargs echo -n)"
+
+        if [[ -z "${setting}" ]]; then
+          env2ini::log '  ! invalid setting'
+          exit 1
+        fi
+
+        local value=''
+        local regex="^${setting}(\s*)=(\s*)(.*)"
+        if [[ $line =~ $regex ]]; then
+          value="${BASH_REMATCH[3]}"
+        else
+          env2ini::log '  ! invalid setting'
+          exit 1
+        fi
+
+        env2ini::log "  + '${setting}'"
+
+        export "${setting^^}=${value}"                           # '^^' makes the variable content uppercase
+      done < "$TMP_EXISTING_ENVS_FILE"
+
+      rm $TMP_EXISTING_ENVS_FILE
+    }
+
+
+    function env2ini::process_config_file() {
+      local config_file="${1}"
+      local section="$(basename "${config_file}")"
+
+      if [[ $section == '_generals_' ]]; then
+        env2ini::log "  [ini root]"
+        section=''
+      else
+        env2ini::log "  ${section}"
+      fi
+
+      while read -r line; do
+        env2ini::read_config_to_env "${section}" "${line}"
+      done < <(awk 1 "${config_file}")                             # Helm .toYaml trims the trailing new line which breaks line processing; awk 1 ... adds it back while reading
+    }
+
+    function env2ini::load_config_sources() {
+      local path="${1}"
+
+      if [[ -d "${path}" ]]; then
+        env2ini::log "Processing $(basename "${path}")..."
+
+        while read -d '' configFile; do
+          env2ini::process_config_file "${configFile}"
+        done < <(find "${path}" -type l -not -name '..data' -print0)
+
+        env2ini::log "\n"
+      fi
+    }
+
+    function env2ini::generate_initial_secrets() {
+      # These environment variables will either be
+      #   - overwritten with user defined values,
+      #   - initially used to set up Gitea
+      # Anyway, they won't harm existing app.ini files
+
+      export GITEA__SECURITY__INTERNAL_TOKEN=$(gitea generate secret INTERNAL_TOKEN)
+      export GITEA__SECURITY__SECRET_KEY=$(gitea generate secret SECRET_KEY)
+      export GITEA__OAUTH2__JWT_SECRET=$(gitea generate secret JWT_SECRET)
+      export GITEA__SERVER__LFS_JWT_SECRET=$(gitea generate secret LFS_JWT_SECRET)
+
+      env2ini::log "...Initial secrets generated\n"
+    }
+
+    # save existing envs prior to script execution. Necessary to keep order of preexisting and custom envs
+    env | (grep -e '^GITEA__' || [[ $? == 1 ]]) > $TMP_EXISTING_ENVS_FILE
+
+    # MUST BE CALLED BEFORE OTHER CONFIGURATION
+    env2ini::generate_initial_secrets
+
+    env2ini::load_config_sources "$ENV_TO_INI_MOUNT_POINT/inlines/"
+    env2ini::load_config_sources "$ENV_TO_INI_MOUNT_POINT/additionals/"
+
+    # load existing envs to override auto generated envs
+    env2ini::reload_preset_envs
+
+    env2ini::log "=== All configuration sources loaded ===\n"
+
+    # safety to prevent rewrite of secret keys if an app.ini already exists
+    if [ -f ${GITEA_APP_INI} ]; then
+      env2ini::log 'An app.ini file already exists. To prevent overwriting secret keys, these settings are dropped and remain unchanged:'
+      env2ini::log '  - security.INTERNAL_TOKEN'
+      env2ini::log '  - security.SECRET_KEY'
+      env2ini::log '  - oauth2.JWT_SECRET'
+      env2ini::log '  - server.LFS_JWT_SECRET'
+
+      unset GITEA__SECURITY__INTERNAL_TOKEN
+      unset GITEA__SECURITY__SECRET_KEY
+      unset GITEA__OAUTH2__JWT_SECRET
+      unset GITEA__SERVER__LFS_JWT_SECRET
+    fi
+
+    environment-to-ini -o $GITEA_APP_INI
 type: Opaque
 ---
 apiVersion: v1
@@ -4245,18 +4399,18 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea-init
   namespace: gitea
 stringData:
   configure_gitea.sh: "#!/usr/bin/env bash\n\nset -euo pipefail\n\necho '==== BEGIN GITEA CONFIGURATION ===='\n\n{ # try\n  gitea migrate\n} || { # catch\n  echo \"Gitea migrate might fail due to database connection...This init-container will try again in a few seconds\"\n  exit 1\n}\nfunction configure_admin_user() {\n  local full_admin_list=$(gitea admin user list --admin)\n  local actual_user_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+Username\\s+Email\\s+IsActive.*)\"\n  if [[ \"${full_admin_list}\" =~ $regex ]]; then\n    actual_user_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_admin_user' was not able to determine the current list of admin users.\"\n    echo \"       Please review the output of 'gitea admin user list --admin' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-chart/issues.\"\n    echo \"DEBUG: Output of 'gitea admin user list --admin'\"\n    echo \"--\"\n    echo \"${full_admin_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local ACCOUNT_ID=$(echo \"${actual_user_table}\" | grep -E \"\\s+${GITEA_ADMIN_USERNAME}\\s+\" | awk -F \" \" \"{printf \\$1}\")\n  if [[ -z \"${ACCOUNT_ID}\" ]]; then\n    local -a create_args\n    create_args=(--admin --username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\" --email \"gitea@local.domain\")\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = initialOnlyRequireReset ]]; then\n      create_args+=(--must-change-password=true)\n    else\n      create_args+=(--must-change-password=false)\n    fi\n    echo \"No admin user '${GITEA_ADMIN_USERNAME}' found. Creating now...\"\n    gitea admin user create \"${create_args[@]}\"\n    echo '...created.'\n  else\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = keepUpdated ]]; then\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist. Running update to sync password...\"\n      # See https://gitea.com/gitea/helm-chart/issues/673\n      # --must-change-password argument was added to change-password, defaulting to true, counter to the previous behavior\n      #   which acted as if it were provided with =false. If the argument is present in this version of gitea, then we\n      #   should add it to prevent requiring frequent admin password resets.\n      local -a change_args\n      change_args=(--username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\")\n      if gitea admin user change-password --help | grep -qF -- '--must-change-password'; then\n        change_args+=(--must-change-password=false)\n      fi\n      gitea admin user change-password \"${change_args[@]}\"\n      echo '...password sync done.'\n    else\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist, but update mode is set to '${GITEA_ADMIN_PASSWORD_MODE}'. Skipping.\"\n    fi\n  fi\n}\n\nconfigure_admin_user\n\nfunction configure_ldap() {\n    echo 'no ldap configuration... skipping.'\n}\n\nconfigure_ldap\n\nfunction configure_oauth() {\n  local OAUTH_NAME='keycloak'\n  local full_auth_list=$(gitea admin auth list --vertical-bars)\n  local actual_auth_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+\\|Name\\s+\\|Type\\s+\\|Enabled.*)\"\n  if [[ \"${full_auth_list}\" =~ $regex ]]; then\n    actual_auth_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_oauth' was not able to determine the current list of authentication sources.\"\n    echo \"       Please review the output of 'gitea admin auth list --vertical-bars' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-chart/issues.\"\n    echo \"DEBUG: Output of 'gitea admin auth list --vertical-bars'\"\n    echo \"--\"\n    echo \"${full_auth_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local AUTH_ID=$(echo \"${actual_auth_table}\" | grep -E \"\\|${OAUTH_NAME}\\s+\\|\" | grep -iE '\\|OAuth2\\s+\\|' | awk -F \" \"  \"{print \\$1}\")\n\n  if [[ -z \"${AUTH_ID}\" ]]; then\n    echo \"No oauth configuration found with name '${OAUTH_NAME}'. Installing it now...\"\n    gitea admin auth add-oauth --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...installed.'\n  else\n    echo \"Existing oauth configuration with name '${OAUTH_NAME}': '${AUTH_ID}'. Running update to sync settings...\"\n    gitea admin auth update-oauth --id \"${AUTH_ID}\" --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...sync settings done.'\n  fi\n}\n\nconfigure_oauth\n\necho '==== END GITEA CONFIGURATION ===='"
-  configure_gpg_environment.sh: |-
+  configure_gpg_environment.sh: |
     #!/usr/bin/env bash
     set -eu
 
-    gpg --batch --import /raw/private.asc
+    gpg --batch --import "$TMP_RAW_GPG_KEY"
   init_directory_structure.sh: |-
     #!/usr/bin/env bash
 
@@ -4278,9 +4432,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea-inline-config
   namespace: gitea
 stringData:
@@ -4480,9 +4634,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea-http
   namespace: gitea
 spec:
@@ -4504,8 +4658,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql
   namespace: gitea
 spec:
@@ -4529,8 +4683,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql-hl
   namespace: gitea
 spec:
@@ -4554,9 +4708,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea-ssh
   namespace: gitea
 spec:
@@ -6108,9 +6262,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea
   namespace: gitea
 spec:
@@ -6124,16 +6278,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 42dc3391d15270c36d253486815bc03d3aee96fb09e1345ae528e84f43c5eb11
+        checksum/config: 662e54596bdc0f90e76c03a20477441761474ea0c53e5a2e9df965c84f78e155
         checksum/oauth_0: 01764dcd9b49e15763176a4daa8f8e10f4902756616d3e834ef1341e80062ad5
       labels:
         app: gitea
         app.kubernetes.io/instance: gitea
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: gitea
-        app.kubernetes.io/version: 1.22.3
-        helm.sh/chart: gitea-10.6.0
-        version: 1.22.3
+        app.kubernetes.io/version: 1.23.4
+        helm.sh/chart: gitea-11.0.0
+        version: 1.23.4
     spec:
       containers:
         - env:
@@ -6153,7 +6307,7 @@ spec:
               value: /tmp/gitea
             - name: HOME
               value: /data/gitea/git
-          image: gitea/gitea:1.22.3-rootless
+          image: docker.gitea.com/gitea:1.23.4-rootless
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 10
@@ -6196,7 +6350,7 @@ spec:
               value: /data
             - name: GITEA_TEMP
               value: /tmp/gitea
-          image: gitea/gitea:1.22.3-rootless
+          image: docker.gitea.com/gitea:1.23.4-rootless
           imagePullPolicy: IfNotPresent
           name: init-directories
           resources:
@@ -6223,7 +6377,11 @@ spec:
               value: /data
             - name: GITEA_TEMP
               value: /tmp/gitea
-          image: gitea/gitea:1.22.3-rootless
+            - name: TMP_EXISTING_ENVS_FILE
+              value: /tmp/existing-envs
+            - name: ENV_TO_INI_MOUNT_POINT
+              value: /env-to-ini-mounts
+          image: docker.gitea.com/gitea:1.23.4-rootless
           imagePullPolicy: IfNotPresent
           name: init-app-ini
           resources:
@@ -6276,7 +6434,7 @@ spec:
                   name: gitea-admin-user
             - name: GITEA_ADMIN_PASSWORD_MODE
               value: keepUpdated
-          image: gitea/gitea:1.22.3-rootless
+          image: docker.gitea.com/gitea:1.23.4-rootless
           imagePullPolicy: IfNotPresent
           name: configure-gitea
           resources:
@@ -6858,7 +7016,7 @@ spec:
               value: https://netbird.homelab.olav.ninja
             - name: NB_CONFIG
               value: /config/config.json
-          image: netbirdio/netbird:0.36.3
+          image: netbirdio/netbird:0.37.1
           name: netbird-agent
           securityContext:
             allowPrivilegeEscalation: false
@@ -6910,7 +7068,7 @@ spec:
             - console
             - --dns-domain
             - netbird
-          image: netbirdio/management:0.36.3
+          image: netbirdio/management:0.37.1
           imagePullPolicy: IfNotPresent
           name: netbird-management
           ports:
@@ -7048,7 +7206,7 @@ spec:
             - info
             - --log-file
             - console
-          image: netbirdio/signal:0.36.3
+          image: netbirdio/signal:0.37.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             tcpSocket:
@@ -7169,7 +7327,7 @@ spec:
                   name: netbird-relay-credentials
             - name: NB_EXPOSED_ADDRESS
               value: rels://netbird.homelab.olav.ninja:443
-          image: netbirdio/relay:0.36.3
+          image: netbirdio/relay:0.37.1
           imagePullPolicy: IfNotPresent
           name: netbird-relay
           ports:
@@ -7792,8 +7950,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql
   namespace: gitea
 spec:
@@ -7811,8 +7969,8 @@ spec:
         app.kubernetes.io/instance: gitea
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 16.3.0
-        helm.sh/chart: postgresql-15.5.20
+        app.kubernetes.io/version: 17.4.0
+        helm.sh/chart: postgresql-16.4.14
       name: gitea-postgresql
     spec:
       affinity:
@@ -9126,8 +9284,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql
   namespace: gitea
 spec:
@@ -10878,9 +11036,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea
   namespace: gitea
 spec:
@@ -11264,8 +11422,8 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: 16.3.0
-    helm.sh/chart: postgresql-15.5.20
+    app.kubernetes.io/version: 17.4.0
+    helm.sh/chart: postgresql-16.4.14
   name: gitea-postgresql
   namespace: gitea
 spec:
@@ -11629,9 +11787,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.22.3
-    helm.sh/chart: gitea-10.6.0
-    version: 1.22.3
+    app.kubernetes.io/version: 1.23.4
+    helm.sh/chart: gitea-11.0.0
+    version: 1.23.4
   name: gitea-test-connection
   namespace: gitea
 spec:
