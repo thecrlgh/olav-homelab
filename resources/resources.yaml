@@ -400,8 +400,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama
   namespace: ollama
 ---
@@ -5183,8 +5183,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama
   namespace: ollama
 spec:
@@ -5420,8 +5420,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama
   namespace: ollama
 spec:
@@ -7634,8 +7634,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama
   namespace: ollama
 spec:
@@ -7652,14 +7652,14 @@ spec:
         app.kubernetes.io/instance: ollama
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: ollama
-        app.kubernetes.io/version: 0.6.1
-        helm.sh/chart: ollama-1.10.0
+        app.kubernetes.io/version: 0.6.2
+        helm.sh/chart: ollama-1.11.0
     spec:
       containers:
         - args: null
           env: null
           envFrom: null
-          image: ollama/ollama:0.6.1-rocm
+          image: ollama/ollama:0.6.2-rocm
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 6
@@ -11353,8 +11353,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama
   namespace: ollama
 spec:
@@ -11817,8 +11817,8 @@ metadata:
     app.kubernetes.io/instance: ollama
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: ollama
-    app.kubernetes.io/version: 0.6.1
-    helm.sh/chart: ollama-1.10.0
+    app.kubernetes.io/version: 0.6.2
+    helm.sh/chart: ollama-1.11.0
   name: ollama-test-connection
   namespace: ollama
 spec:
