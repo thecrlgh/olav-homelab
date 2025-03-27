@@ -4230,9 +4230,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea
   namespace: gitea
 stringData:
@@ -4402,13 +4402,13 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea-init
   namespace: gitea
 stringData:
-  configure_gitea.sh: "#!/usr/bin/env bash\n\nset -euo pipefail\n\necho '==== BEGIN GITEA CONFIGURATION ===='\n\n{ # try\n  gitea migrate\n} || { # catch\n  echo \"Gitea migrate might fail due to database connection...This init-container will try again in a few seconds\"\n  exit 1\n}\nfunction configure_admin_user() {\n  local full_admin_list=$(gitea admin user list --admin)\n  local actual_user_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+Username\\s+Email\\s+IsActive.*)\"\n  if [[ \"${full_admin_list}\" =~ $regex ]]; then\n    actual_user_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_admin_user' was not able to determine the current list of admin users.\"\n    echo \"       Please review the output of 'gitea admin user list --admin' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-chart/issues.\"\n    echo \"DEBUG: Output of 'gitea admin user list --admin'\"\n    echo \"--\"\n    echo \"${full_admin_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local ACCOUNT_ID=$(echo \"${actual_user_table}\" | grep -E \"\\s+${GITEA_ADMIN_USERNAME}\\s+\" | awk -F \" \" \"{printf \\$1}\")\n  if [[ -z \"${ACCOUNT_ID}\" ]]; then\n    local -a create_args\n    create_args=(--admin --username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\" --email \"gitea@local.domain\")\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = initialOnlyRequireReset ]]; then\n      create_args+=(--must-change-password=true)\n    else\n      create_args+=(--must-change-password=false)\n    fi\n    echo \"No admin user '${GITEA_ADMIN_USERNAME}' found. Creating now...\"\n    gitea admin user create \"${create_args[@]}\"\n    echo '...created.'\n  else\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = keepUpdated ]]; then\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist. Running update to sync password...\"\n      # See https://gitea.com/gitea/helm-chart/issues/673\n      # --must-change-password argument was added to change-password, defaulting to true, counter to the previous behavior\n      #   which acted as if it were provided with =false. If the argument is present in this version of gitea, then we\n      #   should add it to prevent requiring frequent admin password resets.\n      local -a change_args\n      change_args=(--username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\")\n      if gitea admin user change-password --help | grep -qF -- '--must-change-password'; then\n        change_args+=(--must-change-password=false)\n      fi\n      gitea admin user change-password \"${change_args[@]}\"\n      echo '...password sync done.'\n    else\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist, but update mode is set to '${GITEA_ADMIN_PASSWORD_MODE}'. Skipping.\"\n    fi\n  fi\n}\n\nconfigure_admin_user\n\nfunction configure_ldap() {\n    echo 'no ldap configuration... skipping.'\n}\n\nconfigure_ldap\n\nfunction configure_oauth() {\n  local OAUTH_NAME='keycloak'\n  local full_auth_list=$(gitea admin auth list --vertical-bars)\n  local actual_auth_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+\\|Name\\s+\\|Type\\s+\\|Enabled.*)\"\n  if [[ \"${full_auth_list}\" =~ $regex ]]; then\n    actual_auth_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_oauth' was not able to determine the current list of authentication sources.\"\n    echo \"       Please review the output of 'gitea admin auth list --vertical-bars' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-chart/issues.\"\n    echo \"DEBUG: Output of 'gitea admin auth list --vertical-bars'\"\n    echo \"--\"\n    echo \"${full_auth_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local AUTH_ID=$(echo \"${actual_auth_table}\" | grep -E \"\\|${OAUTH_NAME}\\s+\\|\" | grep -iE '\\|OAuth2\\s+\\|' | awk -F \" \"  \"{print \\$1}\")\n\n  if [[ -z \"${AUTH_ID}\" ]]; then\n    echo \"No oauth configuration found with name '${OAUTH_NAME}'. Installing it now...\"\n    gitea admin auth add-oauth --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...installed.'\n  else\n    echo \"Existing oauth configuration with name '${OAUTH_NAME}': '${AUTH_ID}'. Running update to sync settings...\"\n    gitea admin auth update-oauth --id \"${AUTH_ID}\" --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...sync settings done.'\n  fi\n}\n\nconfigure_oauth\n\necho '==== END GITEA CONFIGURATION ===='"
+  configure_gitea.sh: "#!/usr/bin/env bash\n\nset -euo pipefail\n\necho '==== BEGIN GITEA CONFIGURATION ===='\n\n{ # try\n  gitea migrate\n} || { # catch\n  echo \"Gitea migrate might fail due to database connection...This init-container will try again in a few seconds\"\n  exit 1\n}\nfunction configure_admin_user() {\n  local full_admin_list=$(gitea admin user list --admin)\n  local actual_user_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+Username\\s+Email\\s+IsActive.*)\"\n  if [[ \"${full_admin_list}\" =~ $regex ]]; then\n    actual_user_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_admin_user' was not able to determine the current list of admin users.\"\n    echo \"       Please review the output of 'gitea admin user list --admin' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-gitea/issues.\"\n    echo \"DEBUG: Output of 'gitea admin user list --admin'\"\n    echo \"--\"\n    echo \"${full_admin_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local ACCOUNT_ID=$(echo \"${actual_user_table}\" | grep -E \"\\s+${GITEA_ADMIN_USERNAME}\\s+\" | awk -F \" \" \"{printf \\$1}\")\n  if [[ -z \"${ACCOUNT_ID}\" ]]; then\n    local -a create_args\n    create_args=(--admin --username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\" --email \"gitea@local.domain\")\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = initialOnlyRequireReset ]]; then\n      create_args+=(--must-change-password=true)\n    else\n      create_args+=(--must-change-password=false)\n    fi\n    echo \"No admin user '${GITEA_ADMIN_USERNAME}' found. Creating now...\"\n    gitea admin user create \"${create_args[@]}\"\n    echo '...created.'\n  else\n    if [[ \"${GITEA_ADMIN_PASSWORD_MODE}\" = keepUpdated ]]; then\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist. Running update to sync password...\"\n      # See https://gitea.com/gitea/helm-gitea/issues/673\n      # --must-change-password argument was added to change-password, defaulting to true, counter to the previous behavior\n      #   which acted as if it were provided with =false. If the argument is present in this version of gitea, then we\n      #   should add it to prevent requiring frequent admin password resets.\n      local -a change_args\n      change_args=(--username \"${GITEA_ADMIN_USERNAME}\" --password \"${GITEA_ADMIN_PASSWORD}\")\n      if gitea admin user change-password --help | grep -qF -- '--must-change-password'; then\n        change_args+=(--must-change-password=false)\n      fi\n      gitea admin user change-password \"${change_args[@]}\"\n      echo '...password sync done.'\n    else\n      echo \"Admin account '${GITEA_ADMIN_USERNAME}' already exist, but update mode is set to '${GITEA_ADMIN_PASSWORD_MODE}'. Skipping.\"\n    fi\n  fi\n}\n\nconfigure_admin_user\n\nfunction configure_ldap() {\n    echo 'no ldap configuration... skipping.'\n}\n\nconfigure_ldap\n\nfunction configure_oauth() {\n  local OAUTH_NAME='keycloak'\n  local full_auth_list=$(gitea admin auth list --vertical-bars)\n  local actual_auth_table=''\n\n  # We might have distorted output due to warning logs, so we have to detect the actual user table by its headline and trim output above that line\n  local regex=\"(.*)(ID\\s+\\|Name\\s+\\|Type\\s+\\|Enabled.*)\"\n  if [[ \"${full_auth_list}\" =~ $regex ]]; then\n    actual_auth_table=$(echo \"${BASH_REMATCH[2]}\" | tail -n+2) # tail'ing to drop the table headline\n  else\n    # This code block should never be reached, as long as the output table header remains the same.\n    # If this code block is reached, the regex doesn't match anymore and we probably have to adjust this script.\n\n    echo \"ERROR: 'configure_oauth' was not able to determine the current list of authentication sources.\"\n    echo \"       Please review the output of 'gitea admin auth list --vertical-bars' shown below.\"\n    echo \"       If you think it is an issue with the Helm Chart provisioning, file an issue at https://gitea.com/gitea/helm-gitea/issues.\"\n    echo \"DEBUG: Output of 'gitea admin auth list --vertical-bars'\"\n    echo \"--\"\n    echo \"${full_auth_list}\"\n    echo \"--\"\n    exit 1\n  fi\n\n  local AUTH_ID=$(echo \"${actual_auth_table}\" | grep -E \"\\|${OAUTH_NAME}\\s+\\|\" | grep -iE '\\|OAuth2\\s+\\|' | awk -F \" \"  \"{print \\$1}\")\n\n  if [[ -z \"${AUTH_ID}\" ]]; then\n    echo \"No oauth configuration found with name '${OAUTH_NAME}'. Installing it now...\"\n    gitea admin auth add-oauth --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...installed.'\n  else\n    echo \"Existing oauth configuration with name '${OAUTH_NAME}': '${AUTH_ID}'. Running update to sync settings...\"\n    gitea admin auth update-oauth --id \"${AUTH_ID}\" --auto-discover-url \"https://keycloak.homelab.olav.ninja/realms/homelab/.well-known/openid-configuration\" --key \"${GITEA_OAUTH_KEY_0}\" --name \"keycloak\" --provider \"openidConnect\" --secret \"${GITEA_OAUTH_SECRET_0}\" \n    echo '...sync settings done.'\n  fi\n}\n\nconfigure_oauth\n\necho '==== END GITEA CONFIGURATION ===='"
   configure_gpg_environment.sh: |
     #!/usr/bin/env bash
     set -eu
@@ -4435,9 +4435,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea-inline-config
   namespace: gitea
 stringData:
@@ -4637,9 +4637,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea-http
   namespace: gitea
 spec:
@@ -4711,9 +4711,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea-ssh
   namespace: gitea
 spec:
@@ -6266,9 +6266,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea
   namespace: gitea
 spec:
@@ -6282,16 +6282,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 662e54596bdc0f90e76c03a20477441761474ea0c53e5a2e9df965c84f78e155
+        checksum/config: f005071cf4fa304e7ee2711937b549106a62f627c9ddf94611bf42ad379675ea
         checksum/oauth_0: 01764dcd9b49e15763176a4daa8f8e10f4902756616d3e834ef1341e80062ad5
       labels:
         app: gitea
         app.kubernetes.io/instance: gitea
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: gitea
-        app.kubernetes.io/version: 1.23.4
-        helm.sh/chart: gitea-11.0.0
-        version: 1.23.4
+        app.kubernetes.io/version: 1.23.6
+        helm.sh/chart: gitea-11.0.1
+        version: 1.23.6
     spec:
       containers:
         - env:
@@ -6311,7 +6311,7 @@ spec:
               value: /tmp/gitea
             - name: HOME
               value: /data/gitea/git
-          image: docker.gitea.com/gitea:1.23.4-rootless
+          image: docker.gitea.com/gitea:1.23.6-rootless
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 10
@@ -6354,7 +6354,7 @@ spec:
               value: /data
             - name: GITEA_TEMP
               value: /tmp/gitea
-          image: docker.gitea.com/gitea:1.23.4-rootless
+          image: docker.gitea.com/gitea:1.23.6-rootless
           imagePullPolicy: IfNotPresent
           name: init-directories
           resources:
@@ -6385,7 +6385,7 @@ spec:
               value: /tmp/existing-envs
             - name: ENV_TO_INI_MOUNT_POINT
               value: /env-to-ini-mounts
-          image: docker.gitea.com/gitea:1.23.4-rootless
+          image: docker.gitea.com/gitea:1.23.6-rootless
           imagePullPolicy: IfNotPresent
           name: init-app-ini
           resources:
@@ -6438,7 +6438,7 @@ spec:
                   name: gitea-admin-user
             - name: GITEA_ADMIN_PASSWORD_MODE
               value: keepUpdated
-          image: docker.gitea.com/gitea:1.23.4-rootless
+          image: docker.gitea.com/gitea:1.23.6-rootless
           imagePullPolicy: IfNotPresent
           name: configure-gitea
           resources:
@@ -11041,9 +11041,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea
   namespace: gitea
 spec:
@@ -11793,9 +11793,9 @@ metadata:
     app.kubernetes.io/instance: gitea
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: gitea
-    app.kubernetes.io/version: 1.23.4
-    helm.sh/chart: gitea-11.0.0
-    version: 1.23.4
+    app.kubernetes.io/version: 1.23.6
+    helm.sh/chart: gitea-11.0.1
+    version: 1.23.6
   name: gitea-test-connection
   namespace: gitea
 spec:
